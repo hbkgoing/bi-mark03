@@ -2,17 +2,31 @@
   <!-- 容器 -->
   <div id="app">
     <!-- 左边图表list -->
-    <widget-list :list="widgetList" @onWidgetMouseDown="onWidgetMouseDown" />
+    <a-tabs class="sider" v-model:activeKey="activeKey">
+      <a-tab-pane key="1" tab="图层">
+        <draggable
+          @change="sortChange"
+          v-model='list'
+          :component-data="{ name: 'fade', type: 'transtion-group' }"
+          item-key="id"
+        >
+          <template #item="{ element }">
+            <div class="layer">{{ element.label }}</div>
+          </template>
+        </draggable>
+      </a-tab-pane>
+      <a-tab-pane key="2" tab="组件" force-render>
+        <widget-list
+          :list="widgetList"
+          @onWidgetMouseDown="onWidgetMouseDown"
+        />
+      </a-tab-pane>
+    </a-tabs>
 
     <!-- 右边的画布 -->
-    <div
-      class="panel"
-      ref="panel"
-      @dragover.prevent
-      @drop="onDrop"
-    >
+    <div class="panel" ref="panel" @dragover.prevent @drop="onDrop">
       <Dragger
-        v-for="(item) in list"
+        v-for="(item, i) in list"
         ref="widget"
         :key="item.id"
         :x="item.x"
@@ -26,9 +40,7 @@
         @contextmenu.prevent.stop="handleClick($event, item)"
         class="box"
       >
-        <component :is="item.component" 
-        
-        />
+        <component :is="item.component" @onDrop="onDrop($event, i)" />
       </Dragger>
     </div>
   </div>
@@ -59,13 +71,22 @@ import CustomVideo from "./components/custom-video";
 import VueSimpleContextMenu from "vue-simple-context-menu";
 import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
 import "font-awesome/css/font-awesome.min.css";
+import { ref } from "vue";
+import draggable from "vuedraggable";
+
 export default {
   name: "App",
 
+  setup() {
+    return {
+      activeKey: ref("1"),
+    };
+  },
 
   //参与渲染的数据
   data() {
     return {
+      drag: false,
       list: [],
       widgetList: CONFIG.WIDGET_LIST,
       options: [
@@ -105,8 +126,27 @@ export default {
     CustomText,
     CustomVideo,
     VueSimpleContextMenu,
+    draggable,
   },
   methods: {
+
+
+    sortLayerList(){
+      this.list.sort((a,b)=>b.z-a.z);
+    },
+
+    //拖拽图层改变后，改变list中item.z
+    //list中z的排序是不间隔的数字从0开始
+    //dragger事件改变了list中item的索引
+    sortChange(){
+      //按照所以来改变z
+      let len = this.list.length-1;
+      this.list.forEach((item,i)=>{
+        item.z = len-i;
+      })
+    },
+
+
     //鼠标右键点击事件
     handleClick(event, item) {
       for (const el of this.list) {
@@ -131,7 +171,7 @@ export default {
           // 置顶
           if (maxZ === currentZ) {
             window.alert("已经是最顶层了！");
-            return;
+            break;
           }
           for (const item of this.list) {
             if (item.z === currentZ) {
@@ -148,7 +188,7 @@ export default {
           for (const item of this.list) {
             if (0 === currentZ) {
               window.alert("已经是最底层了！");
-              return;
+              break;
             }
             if (item.z < currentZ) {
               item.z++;
@@ -162,7 +202,7 @@ export default {
         case "moveUp":
           if (maxZ === currentZ) {
             window.alert("已经是最顶层了！");
-            return;
+            break;
           }
           this.list[currentZ].z = currentZ + 1;
           this.list[currentZ + 1].z = currentZ;
@@ -171,7 +211,7 @@ export default {
         case "moveDown":
           if (0 === currentZ) {
             window.alert("已经是最底层了！");
-            return;
+            break;
           }
           this.list[currentZ].z = currentZ - 1;
           this.list[currentZ - 1].z = currentZ;
@@ -183,19 +223,19 @@ export default {
               item.z--;
             }
           }
-          console.log(this.list);
           break;
       }
+       this.sortLayerList();
     },
 
     //单击widget事件
+    //todo: bug 点击事件执行第一次没有获取到焦点，第二次才获取到焦点
     onActivated(e, item) {
       for (const el of this.list) {
-        if (item.id !== el.id) {
-          console.log(el);
-          el.focused = false;
-        } else {
+        if (item.id === el.id) {
           el.focused = true;
+        } else {
+          el.focused = false;
         }
       }
     },
@@ -209,20 +249,19 @@ export default {
     },
 
     //放置widget
-    onDrop(e,i) {
+    onDrop(e, i) {
       let x = e.offsetX - widgetX;
       let y = e.offsetY - widgetY;
-      if(i !==undefined){
-        const currentWidget = this.$refs['widget'][i].$el;
-        x= e.offsetX + currentWidget.offsetLeft -widgetX;
+      if (i !== undefined) {
+        const currentWidget = this.$refs["widget"][i].$el;
+        x = e.offsetX + currentWidget.offsetLeft - widgetX;
         y = e.offsetY + currentWidget.offsetTop - widgetY;
       }
 
       for (const item of this.list) {
         item.focused = false;
       }
-
-      this.list.push({
+      let el = {
         id: currentId++,
         //e.offset 就是拖拽的位置
         // x: e.offsetX - widgetX, 这里有个bug，
@@ -240,12 +279,14 @@ export default {
         component: currentWidget.component,
         //widget获取焦点
         focused: true,
-      });
+      }
+
+      this.list.unshift(el);
+
     },
 
     //确定widget放置精准位置
     onWidgetMouseDown(e, widget) {
-      console.log(widget);
       widgetX = e.offsetX;
       widgetY = e.offsetY;
       currentWidget = widget;
@@ -264,9 +305,10 @@ body {
   width: 100vw;
 }
 
-.widget-list {
+.sider {
   width: 200px;
   background-color: aliceblue;
+  align-content: center;
 }
 
 .widget {
@@ -291,5 +333,15 @@ body {
 .box {
   outline: 1px solid blue;
   position: absolute;
+}
+
+.layer {
+  height: 50px;
+  width: 100%;
+  background-color: aliceblue;
+}
+
+.layer:hover {
+  background-color: gray;
 }
 </style>

@@ -1,8 +1,6 @@
 <template>
-  <v-chart class="chart" 
-  :option="option" 
-  autoresize
-  />
+  <v-chart 
+  class="chart" :option="option" autoresize />
 </template>
 
 
@@ -10,6 +8,14 @@
 
 <script>
 export default {
+
+ methods:{
+  
+ },
+
+  props:{
+    index:String,
+  },
   data() {
     return {
       option: {
