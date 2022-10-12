@@ -1,48 +1,72 @@
 <template>
   <!-- 容器 -->
   <div id="app">
-    <!-- 左边图表list -->
-    <a-tabs class="sider" v-model:activeKey="activeKey">
-      <a-tab-pane key="1" tab="图层">
-        <draggable
-          @change="sortChange"
-          v-model='list'
-          :component-data="{ name: 'fade', type: 'transtion-group' }"
-          item-key="id"
-        >
-          <template #item="{ element }">
-            <div class="layer">{{ element.label }}</div>
-          </template>
-        </draggable>
-      </a-tab-pane>
-      <a-tab-pane key="2" tab="组件" force-render>
-        <widget-list
-          :list="widgetList"
-          @onWidgetMouseDown="onWidgetMouseDown"
-        />
-      </a-tab-pane>
-    </a-tabs>
-
-    <!-- 右边的画布 -->
-    <div class="panel" ref="panel" @dragover.prevent @drop="onDrop">
-      <Dragger
-        v-for="(item, i) in list"
-        ref="widget"
-        :key="item.id"
-        :x="item.x"
-        :y="item.y"
-        :w="item.w"
-        :z="item.z"
-        :h="item.h"
-        :isActive="item.focused"
-        @clicked="onActivated(e, item)"
-        @deactivated="onDeactivated(e, item)"
-        @contextmenu.prevent.stop="handleClick($event, item)"
-        class="box"
+    <a-layout>
+      <a-layout-header
+        style="
+          height: 30px;
+          font-size: 12px;
+          text-align: center;
+          line-height: 30px;
+          color: #c3baba;
+        "
       >
-        <component :is="item.component" @onDrop="onDrop($event, i)" />
-      </Dragger>
-    </div>
+        BI-Mark03
+      </a-layout-header>
+      <a-layout>
+        <a-layout-sider>
+          <!-- 左边图表list -->
+          <a-tabs centered class="sider" v-model:activeKey="activeKey">
+            <a-tab-pane key="1" tab="图层">
+              <draggable
+                @change="sortChange"
+                v-model="list"
+                :component-data="{ name: 'fade', type: 'transtion-group' }"
+                item-key="id"
+              >
+                <template #item="{ element }">
+                  <div class="layer">{{ element.label }}</div>
+                </template>
+              </draggable>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="组件" force-render>
+              <widget-list
+                style="margin-left: 20px"
+                :list="widgetList"
+                @onWidgetMouseDown="onWidgetMouseDown"
+              />
+            </a-tab-pane>
+          </a-tabs>
+        </a-layout-sider>
+        <a-layout-content>
+          <!-- 右边的画布 -->
+          <div class="panel" ref="panel" @dragover.prevent @drop="onDrop">
+            <Dragger
+              v-for="(item, i) in list"
+              ref="widget"
+              :key="item.id"
+              :x="item.x"
+              :y="item.y"
+              :w="item.w"
+              :z="item.z"
+              :h="item.h"
+              :isActive="item.focused"
+              @clicked="onActivated(e, item)"
+              @deactivated="onDeactivated(e, item)"
+              @contextmenu.prevent.stop="handleClick($event, item)"
+              class="box"
+            >
+              <component :is="item.component" @onDrop="onDrop($event, i)" />
+            </Dragger>
+          </div>
+        </a-layout-content>
+        <a-layout-sider style="background-color: aliceblue">
+          <a-tabs centered class="sider" v-model:activeKey1="activeKey1">
+            <a-tab-pane key="1" tab="配置"> </a-tab-pane>
+          </a-tabs>
+        </a-layout-sider>
+      </a-layout>
+    </a-layout>
   </div>
 
   <vue-simple-context-menu
@@ -129,23 +153,20 @@ export default {
     draggable,
   },
   methods: {
-
-
-    sortLayerList(){
-      this.list.sort((a,b)=>b.z-a.z);
+    sortLayerList() {
+      this.list.sort((a, b) => b.z - a.z);
     },
 
     //拖拽图层改变后，改变list中item.z
     //list中z的排序是不间隔的数字从0开始
     //dragger事件改变了list中item的索引
-    sortChange(){
+    sortChange() {
       //按照所以来改变z
-      let len = this.list.length-1;
-      this.list.forEach((item,i)=>{
-        item.z = len-i;
-      })
+      let len = this.list.length - 1;
+      this.list.forEach((item, i) => {
+        item.z = len - i;
+      });
     },
-
 
     //鼠标右键点击事件
     handleClick(event, item) {
@@ -225,7 +246,7 @@ export default {
           }
           break;
       }
-       this.sortLayerList();
+      this.sortLayerList();
     },
 
     //单击widget事件
@@ -279,10 +300,9 @@ export default {
         component: currentWidget.component,
         //widget获取焦点
         focused: true,
-      }
+      };
 
       this.list.unshift(el);
-
     },
 
     //确定widget放置精准位置
@@ -306,6 +326,7 @@ body {
 }
 
 .sider {
+  height: 100%;
   width: 200px;
   background-color: aliceblue;
   align-content: center;
@@ -321,6 +342,7 @@ body {
 }
 
 .panel {
+  height: 100%;
   flex: 1;
   background-color: white;
   position: relative;
