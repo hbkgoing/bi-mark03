@@ -5,7 +5,7 @@ import VueDragResize from 'vue-drag-resize/src'
 import App from './App.vue'
 import ECharts from 'vue-echarts'
 import { use } from "echarts/core"
-import { Tabs,Layout } from 'ant-design-vue';
+import { Tabs,Layout,Button,Avatar,Image } from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 
 
@@ -35,4 +35,7 @@ app.component('Dragger',VueDragResize)
 app.component('v-chart',ECharts)
 app.use(Tabs)
 app.use(Layout)
+app.use(Button)
+app.use(Avatar)
+app.use(Image)
 app.mount('#app')

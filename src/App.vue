@@ -6,12 +6,13 @@
         style="
           height: 30px;
           font-size: 12px;
-          text-align: center;
           line-height: 30px;
           color: #c3baba;
         "
       >
-        BI-Mark03
+        <div style="right:0">
+            <a-button type="link">撤回</a-button>
+        </div>
       </a-layout-header>
       <a-layout>
         <a-layout-sider>
@@ -25,7 +26,9 @@
                 item-key="id"
               >
                 <template #item="{ element }">
-                  <div class="layer">{{ element.label }}</div>
+                  <layer-item
+                  :item="element"
+                  ></layer-item>
                 </template>
               </draggable>
             </a-tab-pane>
@@ -98,6 +101,8 @@ import "font-awesome/css/font-awesome.min.css";
 import { ref } from "vue";
 import draggable from "vuedraggable";
 
+import LayerItem from "./components/layer-item";
+
 export default {
   name: "App",
 
@@ -151,6 +156,7 @@ export default {
     CustomVideo,
     VueSimpleContextMenu,
     draggable,
+    LayerItem,
   },
   methods: {
     sortLayerList() {
@@ -289,6 +295,7 @@ export default {
         // y: e.offsetY - widgetY,
         x,
         y,
+        icon:currentWidget.icon,
         w: currentWidget.default.w,
         h: currentWidget.default.h,
         // z: currentZ++,如果现在这么定义，那么在回显的时候就会有问题了。currentZ会丢失状态。
@@ -332,14 +339,7 @@ body {
   align-content: center;
 }
 
-.widget {
-  height: 100px;
-  width: 100px;
-  outline: 1px solid red;
-  font-size: 20px;
-  text-align: center;
-  margin: 40;
-}
+
 
 .panel {
   height: 100%;
