@@ -15,7 +15,6 @@ export const WIDGET_LIST=[
         label:'面积图',
         icon:'fa fa-area-chart',
         component: 'area-chart',
-        img:'../assets/logo.png',
         default:{
           w:200,
           h:200,
