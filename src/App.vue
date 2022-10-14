@@ -11,7 +11,7 @@
         "
       >
         <div style="right:0">
-            <a-button type="link">撤回</a-button>
+            <a-button @click="undoChange" type="link">撤回</a-button>
         </div>
       </a-layout-header>
       <a-layout>
@@ -98,7 +98,7 @@ import CustomVideo from "./components/custom-video";
 import VueSimpleContextMenu from "vue-simple-context-menu";
 import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
 import "font-awesome/css/font-awesome.min.css";
-import { ref } from "vue";
+import { ref ,watch } from "vue";
 import draggable from "vuedraggable";
 
 import LayerItem from "./components/layer-item";
@@ -106,17 +106,24 @@ import LayerItem from "./components/layer-item";
 export default {
   name: "App",
 
-  setup() {
-    return {
-      activeKey: ref("1"),
-    };
+  // setup() {
+  //   // return {
+  //   //   
+  //   // };
+    
+   
+  // },
+  mounted(){
+    this.undoList.push([])
   },
 
   //参与渲染的数据
   data() {
     return {
+      activeKey: ref("1"),
       drag: false,
       list: [],
+      undoList:[],
       widgetList: CONFIG.WIDGET_LIST,
       options: [
         {
@@ -157,8 +164,26 @@ export default {
     VueSimpleContextMenu,
     draggable,
     LayerItem,
+    watch,
   },
+  
   methods: {
+    
+    undoChange(){
+      //从undoList中弹出第一个list
+
+      let idx = this.undoList.length-2;
+      console.log(idx,this.undoList)
+      this.list=this.undoList[idx];
+      console.log(this.list)
+      //删除上一步操作,从undoList中
+      if(idx<0){
+        window.alert('无法撤销！')
+        return
+      }
+      this.undoList.splice(idx,1) ;
+    },
+
     sortLayerList() {
       this.list.sort((a, b) => b.z - a.z);
     },
@@ -172,6 +197,7 @@ export default {
       this.list.forEach((item, i) => {
         item.z = len - i;
       });
+      this.undoList.push(this.list)
     },
 
     //鼠标右键点击事件
@@ -253,6 +279,7 @@ export default {
           break;
       }
       this.sortLayerList();
+      this.undoList.push(this.list)
     },
 
     //单击widget事件
@@ -310,6 +337,8 @@ export default {
       };
 
       this.list.unshift(el);
+      this.undoList.push(JSON.parse(JSON.stringify(this.list)))
+      console.log(this.undoList)
     },
 
     //确定widget放置精准位置
