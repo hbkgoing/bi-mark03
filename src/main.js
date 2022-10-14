@@ -5,7 +5,7 @@ import VueDragResize from 'vue-drag-resize/src'
 import App from './App.vue'
 import ECharts from 'vue-echarts'
 import { use } from "echarts/core"
-import { Tabs,Layout,Button,Avatar,Image } from 'ant-design-vue';
+import { Tabs,Layout,Button,Avatar,Image,Tooltip } from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 
 
@@ -38,4 +38,5 @@ app.use(Layout)
 app.use(Button)
 app.use(Avatar)
 app.use(Image)
+app.use(Tooltip)
 app.mount('#app')

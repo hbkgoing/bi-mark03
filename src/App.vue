@@ -3,15 +3,25 @@
   <div id="app">
     <a-layout>
       <a-layout-header
-        style="
-          height: 30px;
-          font-size: 12px;
-          line-height: 30px;
-          color: #c3baba;
-        "
+        style="height: 30px; font-size: 12px; line-height: 30px; color: #c3baba"
       >
-        <div style="right:0">
-            <a-button @click="undoChange" type="link">撤回</a-button>
+        <div style="right: 0">
+          <a-tooltip placement="bottom">
+            <template #title>
+              <span>撤销</span>
+            </template>
+            <a-button @click="undoChange" type="link" title="撤回"
+              ><i class="fa fa-undo"></i
+            ></a-button>
+          </a-tooltip>
+          <a-tooltip placement="bottom">
+            <template #title>
+              <span>恢复</span>
+            </template>
+            <a-button @click="repeatChange" type="link" title="撤回"
+              ><i class="fa fa-repeat"></i
+            ></a-button>
+          </a-tooltip>
         </div>
       </a-layout-header>
       <a-layout>
@@ -26,9 +36,7 @@
                 item-key="id"
               >
                 <template #item="{ element }">
-                  <layer-item
-                  :item="element"
-                  ></layer-item>
+                  <layer-item :item="element"></layer-item>
                 </template>
               </draggable>
             </a-tab-pane>
@@ -98,7 +106,7 @@ import CustomVideo from "./components/custom-video";
 import VueSimpleContextMenu from "vue-simple-context-menu";
 import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
 import "font-awesome/css/font-awesome.min.css";
-import { ref ,watch } from "vue";
+import { ref, watch } from "vue";
 import draggable from "vuedraggable";
 
 import LayerItem from "./components/layer-item";
@@ -108,13 +116,12 @@ export default {
 
   // setup() {
   //   // return {
-  //   //   
+  //   //
   //   // };
-    
-   
+
   // },
-  mounted(){
-    this.undoList.push([])
+  mounted() {
+    this.undoList.push([]);
   },
 
   //参与渲染的数据
@@ -123,7 +130,8 @@ export default {
       activeKey: ref("1"),
       drag: false,
       list: [],
-      undoList:[],
+      undoList: [],
+      recoverList: [],
       widgetList: CONFIG.WIDGET_LIST,
       options: [
         {
@@ -166,22 +174,40 @@ export default {
     LayerItem,
     watch,
   },
-  
-  methods: {
-    
-    undoChange(){
-      //从undoList中弹出第一个list
 
-      let idx = this.undoList.length-2;
-      console.log(idx,this.undoList)
-      this.list=this.undoList[idx];
-      console.log(this.list)
-      //删除上一步操作,从undoList中
-      if(idx<0){
-        window.alert('无法撤销！')
-        return
+  methods: {
+    repeatChange() {
+      //从recoverList中弹出第一个list
+      let idx = this.recoverList.length - 1;
+      if (idx < 0) {
+        window.alert("无法恢复！");
+        return;
       }
-      this.undoList.splice(idx,1) ;
+      this.list = this.recoverList[idx];
+      this.recoverList.splice(idx, 1);
+    },
+
+    undoChange() {
+      let lasted = this.undoList.length - 1;
+       // current list === undoList[lasted]
+
+      this.undoList.splice(lasted, 1);
+      console.log(this.undoList)
+      //从undoList中弹出第2个list,考虑不周
+      let idx = lasted - 1;
+      if (idx < 0) {
+        this.undoList =[];
+        this.undoList.push([]);
+        window.alert("无法撤销！");
+        return;
+      }
+      this.recoverList.push(JSON.parse(JSON.stringify(this.list)));
+      this.list = this.undoList[idx];
+      if(idx===0){
+        this.undoList =[];
+        this.undoList.push([]);
+      }
+    
     },
 
     sortLayerList() {
@@ -197,7 +223,7 @@ export default {
       this.list.forEach((item, i) => {
         item.z = len - i;
       });
-      this.undoList.push(this.list)
+      this.undoList.push(this.list);
     },
 
     //鼠标右键点击事件
@@ -279,7 +305,7 @@ export default {
           break;
       }
       this.sortLayerList();
-      this.undoList.push(this.list)
+      this.undoList.push(this.list);
     },
 
     //单击widget事件
@@ -322,7 +348,7 @@ export default {
         // y: e.offsetY - widgetY,
         x,
         y,
-        icon:currentWidget.icon,
+        icon: currentWidget.icon,
         w: currentWidget.default.w,
         h: currentWidget.default.h,
         // z: currentZ++,如果现在这么定义，那么在回显的时候就会有问题了。currentZ会丢失状态。
@@ -337,8 +363,8 @@ export default {
       };
 
       this.list.unshift(el);
-      this.undoList.push(JSON.parse(JSON.stringify(this.list)))
-      console.log(this.undoList)
+      this.undoList.push(JSON.parse(JSON.stringify(this.list)));
+      console.log(this.undoList);
     },
 
     //确定widget放置精准位置
@@ -367,8 +393,6 @@ body {
   background-color: aliceblue;
   align-content: center;
 }
-
-
 
 .panel {
   height: 100%;
