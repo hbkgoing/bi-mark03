@@ -15,6 +15,7 @@ export const WIDGET_LIST=[
         label:'面积图',
         icon:'fa fa-area-chart',
         component: 'area-chart',
+        img:'https://aliyuncdn.antdv.com/vue.png',
         default:{
           w:200,
           h:200,
@@ -25,6 +26,7 @@ export const WIDGET_LIST=[
         label:'柱状图',
         icon:'fa fa-bar-chart',
         component: 'bar-chart',
+        img:'https://aliyuncdn.antdv.com/vue.png',
         default:{
           w:200,
           h:150,
@@ -34,6 +36,7 @@ export const WIDGET_LIST=[
         type:'video',
         component: 'custom-video',
         icon:'fa fa-file-video-o',
+        img:'https://aliyuncdn.antdv.com/vue.png',
         label:'视频',
         default:{
           w:150,

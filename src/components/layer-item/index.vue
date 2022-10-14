@@ -10,7 +10,7 @@
       ondragstart="return false"
       @keydown.enter="saveName"
     />
-    <div v-else class="name" @dblclick="isEditing = true">
+    <div v-else class="name">
       {{ item.label }}
     </div>
 

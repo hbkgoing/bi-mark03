@@ -71,6 +71,8 @@ todo:
   编辑器->撤销，反撤销
 
 v2:
+
+![image](https://cdn.staticaly.com/gh/hbkgoing/blog_imgs@master/20210423/image.7imjcc4tk440.webp)
  
 
 
