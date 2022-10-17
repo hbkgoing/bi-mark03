@@ -73,6 +73,16 @@ todo:
 v2:
 
 ![image](https://cdn.staticaly.com/gh/hbkgoing/blog_imgs@master/20210423/image.7imjcc4tk440.webp)
+
+
+![image](https://cdn.staticaly.com/gh/hbkgoing/blog_imgs@master/20210423/image.5u6ogxp4pyo0.webp)
+
+
+2022.10.17-todo:
+
+1. 恢复按钮功能
+2. 组件配置功能
+3. 画布左、上标尺
  
 
 
