@@ -189,25 +189,34 @@ export default {
 
     undoChange() {
       let lasted = this.undoList.length - 1;
-       // current list === undoList[lasted]
-
-      this.undoList.splice(lasted, 1);
+      let firstList = this.undoList[lasted];
       console.log(this.undoList)
-      //从undoList中弹出第2个list,考虑不周
-      let idx = lasted - 1;
-      if (idx < 0) {
-        this.undoList =[];
-        this.undoList.push([]);
+      if (firstList.length == 0) {
         window.alert("无法撤销！");
         return;
       }
+      this.undoList.splice(lasted, 1);
       this.recoverList.push(JSON.parse(JSON.stringify(this.list)));
-      this.list = this.undoList[idx];
-      if(idx===0){
-        this.undoList =[];
-        this.undoList.push([]);
-      }
-    
+      //这里赋值都需要深拷贝
+      this.list = JSON.parse(JSON.stringify(this.undoList[lasted-1]));
+
+
+      // current list === undoList[lasted]
+      //从undoList中弹出第2个list,考虑不周
+      //废弃代码
+      // let idx = lasted - 1;
+      // if (idx < 0) {
+      //   this.undoList = [];
+      //   this.undoList.push([]);
+      //   window.alert("无法撤销！");
+      //   return;
+      // }
+      // this.recoverList.push(JSON.parse(JSON.stringify(this.list)));
+      // this.list = this.undoList[idx];
+      // if (idx === 0) {
+      //   this.undoList = [];
+      //   this.undoList.push([]);
+      // }
     },
 
     sortLayerList() {
@@ -363,8 +372,9 @@ export default {
       };
 
       this.list.unshift(el);
+      console.log(JSON.stringify(this.undoList));
       this.undoList.push(JSON.parse(JSON.stringify(this.list)));
-      console.log(this.undoList);
+      console.log(JSON.stringify(this.undoList));
     },
 
     //确定widget放置精准位置
