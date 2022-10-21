@@ -27,3 +27,11 @@ npm run dev
 ```sh
 npm run build
 ```
+
+
+### 功能
+1. 调整画布宽、高
+2. 集成Echart组件
+3. 标尺辅助线
+
+
