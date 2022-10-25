@@ -460,4 +460,8 @@ ul li {
 .my-custom-class {
   font-size: 12px;
 }
+
+.vue-simple-context-menu {
+  position: fixed !important;
+}
 </style>
