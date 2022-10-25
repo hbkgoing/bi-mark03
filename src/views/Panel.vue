@@ -1,10 +1,10 @@
 <template>
   <a-layout>
-    <a-layout-header style="background: #344b5c; height: 4vh; line-height: 4vh">
+    <a-layout-header style="background: #344b5c; height: 4vh; line-height: 4vh;z-index: 2;">
       <topTtool></topTtool>
     </a-layout-header>
     <a-layout>
-      <a-layout-sider theme="light">
+      <a-layout-sider theme="light" style="z-index:1">
         <a-tabs v-model:activeKey="activeKey" centered>
           <a-tab-pane key="1">
             <template #tab>
@@ -27,42 +27,54 @@
         </a-tabs>
       </a-layout-sider>
       <a-layout-content>
-        <div style="height: 96vh; overflow: auto">
-          <canvasRuler
+        <div style="height:4vh;width:40px;float:left;background: gray;;text-align: center;z-index: 2;">
+          <eye-outlined 
+          style="position:fixed;left:210px;top:calc(6vh - 10px);font-size:20px;color: black;"
+          />
+        </div>
+        <div style="">
+          <div class="ruler-top" style="height:4vh;overflow:hidden;">
+            <canvasRuler
+            ref="rulerTop"
             :vertical="false"
             :width="4550"
             :height="40"
             :style="style1"
           ></canvasRuler>
+          </div>
+         <div class="ruler-left" style="width:40px;height:40px;overflow:hidden;float:left">
           <canvasRuler
+            ref="“rulerLeft"
             :vertical="true"
             :width="40"
             :height="4550"
             :style="style2"
           ></canvasRuler>
-
-          <div
-            @dragover.prevent
-            @drop="onDrop"
-            class="content"
-            :style="contentStyle"
-          >
-            <Dragger
-              v-for="item in list.panelList"
-              ref="widget"
-              :key="item.id"
-              :onDrag="onDragCallback"
-              :x="item.x"
-              :y="item.y"
-              :w="item.w"
-              :z="item.z"
-              :h="item.h"
-              :isActive="item.focused"
-              @contextmenu.prevent.stop="handleClick($event, item)"
+         </div>
+         
+          <div ref="panelBox" class="panel-box" style="height:92vh; overflow:auto;">
+            <div
+              @dragover.prevent
+              @drop="onDrop"
+              class="content"
+              :style="contentStyle"
             >
-              <component :is="item.component" @onDrop="onDrop($event, i)" />
-            </Dragger>
-
+              <Dragger
+                v-for="item in list.panelList"
+                ref="widget"
+                :key="item.id"
+                :onDrag="onDragCallback"
+                :x="item.x"
+                :y="item.y"
+                :w="item.w"
+                :z="item.z"
+                :h="item.h"
+                :isActive="item.focused"
+                @contextmenu.prevent.stop="handleClick($event, item)"
+              >
+                <component :is="item.component" @onDrop="onDrop($event, i)" />
+              </Dragger>
+            </div>
           </div>
         </div>
       </a-layout-content>
@@ -71,7 +83,6 @@
       </a-layout-sider>
     </a-layout>
   </a-layout>
-
 
   <vue-simple-context-menu
     element-id="myUniqueId"
@@ -88,18 +99,19 @@ import { ref } from "vue";
 import {
   AppstoreAddOutlined,
   OrderedListOutlined,
+  EyeOutlined,
 } from "@ant-design/icons-vue";
 import topTtool from "../components/top-tool/index.vue";
 import BarChart from "../components/widgets-component/bar-chart/index.vue";
 import AreaChart from "../components/widgets-component/area-chart/index.vue";
-import CustomText from "../components/widgets-component/custom-text/index.vue"
+import CustomText from "../components/widgets-component/custom-text/index.vue";
 import WidgetList from "../components/widget-list/index.vue";
 import CustomVideo from "../components/widgets-component/custom-video/index.vue";
 import siderTool from "../components/sider-tool/index.vue";
 import canvasRuler from "../canvasRuler/index.vue";
 import { assert } from "@vue/compiler-core";
 import { panelList } from "../stores/panelList";
-import { useUndoStore } from "../stores/undoList"
+import { useUndoStore } from "../stores/undoList";
 import VueSimpleContextMenu from "vue-simple-context-menu";
 import "vue-simple-context-menu/dist/vue-simple-context-menu.css";
 import "font-awesome/css/font-awesome.min.css";
@@ -111,14 +123,46 @@ let currentWidget = null;
 const panelConfig = {
   width: 1920,
   height: 1080,
-  bgImg: "src/assets/bg1.jpg",
+  bgImg: "/bi/bg1.jpg",
 };
 
 export default {
+  mounted(){
+    this.panelBox = this.$refs.panelBox;
+    this.panelBox.addEventListener('scroll',()=>{
+      // console.log(this.$refs.panelBox.scrollTop,);
+      //偏移纵标尺
+      let x = this.$refs.panelBox.scrollLeft;
+      let y = this.$refs.panelBox.scrollTop;
+       if(x==0){
+        this.rulerOffsetX='240px'
+       }
+
+       if(x!==0){
+        let offsetX = 240-x;
+        this.rulerOffsetX=offsetX+'px'
+       }
+
+       if(y==0){
+        this.rulerOffsetY='8vh'
+       }
+
+       if(y!==0){
+        let offsetY = "calc(8vh - "+ y +"px)";
+        this.rulerOffsetY=offsetY;
+       }
+       
+       console.log(x)
+      //偏移横标尺
+    })
+
+  },
   data() {
     return {
+      rulerOffsetX:'240px',
+      rulerOffsetY:'8vh',
       list: panelList(),
-      undoList:useUndoStore(),
+      undoList: useUndoStore(),
       options: [
         {
           name: "<i class='fa fa-sort-amount-asc'></i> 置顶",
@@ -160,19 +204,24 @@ export default {
     CustomVideo,
     VueSimpleContextMenu,
     AppstoreAddOutlined,
-    OrderedListOutlined
+    OrderedListOutlined,
+    EyeOutlined,
   },
 
   computed: {
     style1() {
       const hContainer = {
-        left: "40px",
+        left: this.rulerOffsetX,
+        position: "fixed",
+        overflow:'hidden',
       };
       return hContainer;
     },
     style2() {
       const vContainer = {
-        top: "40px",
+        top: this.rulerOffsetY,
+        position: "fixed",
+        overflow:'hidden',
       };
       return vContainer;
     },
@@ -182,8 +231,8 @@ export default {
         height: panelConfig.height + "px",
         width: panelConfig.width + "px",
         // position: "absolute",
-        top: "40px",
-        left: "40px",
+        // top: "40px",
+        // left: "40px",
         background: "url(" + panelConfig.bgImg + ")",
       };
       return style;
@@ -191,7 +240,6 @@ export default {
   },
 
   methods: {
-
     optionClicked(event) {
       //从list中找到最大的z；
       let maxZ = Math.max(...this.list.panelList.map((e) => e.z));
@@ -262,7 +310,7 @@ export default {
       // this.undoList.push(this.list);
     },
 
-     //鼠标右键点击事件
+    //鼠标右键点击事件
     handleClick(event, item) {
       for (const el of this.list.panelList) {
         if (item.id === el.id) {
@@ -272,15 +320,22 @@ export default {
         }
       }
       this.$refs.vueSimpleContextMenu.showMenu(event, item);
-      console.log(this.$refs.vueSimpleContextMenu)
+      console.log(this.$refs.vueSimpleContextMenu);
     },
 
-    onDragCallback(x,y){
-        //如果x,y超出了画布的长、宽，取消拖动
-        const curWidget = this.list.panelList.find(item=> item.focused==true)
-        if(x<0|| y<0 || x>panelConfig.width-curWidget.w || y>panelConfig.height-curWidget.h){
-            return false;
-        }
+    onDragCallback(x, y) {
+      //如果x,y超出了画布的长、宽，取消拖动
+      const curWidget = this.list.panelList.find(
+        (item) => item.focused == true
+      );
+      if (
+        x < 0 ||
+        y < 0 ||
+        x > panelConfig.width - curWidget.w ||
+        y > panelConfig.height - curWidget.h
+      ) {
+        return false;
+      }
     },
 
     onDrop(e) {
@@ -319,8 +374,10 @@ export default {
         focused: true,
       };
       this.list.$patch({ panelList: [...this.list.panelList, el] });
-      this.undoList.$patch({value:[...this.undoList.value,this.list.panelList]})
-      console.log(111,this.undoList.value)
+      this.undoList.$patch({
+        value: [...this.undoList.value, this.list.panelList],
+      });
+      console.log(111, this.undoList.value);
     },
 
     onWidgetMouseDown(e, widget) {
@@ -463,5 +520,9 @@ ul li {
 
 .vue-simple-context-menu {
   position: fixed !important;
+}
+
+.ant-tabs-nav-wrap{
+  height: 4vh;
 }
 </style>
