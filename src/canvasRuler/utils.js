@@ -7,7 +7,6 @@ export const drawVerticalRuler = (ctx) => {
     ctx.beginPath()
     for (var i = 0; i < 451; i++) {
         ctx.moveTo(1, i * 10 + 0.5);
-        console.log(i * 10 + 0.5)
         if (i % 5 !== 0) {
             ctx.lineTo(8, i * 10 + 0.5);
         } else {
