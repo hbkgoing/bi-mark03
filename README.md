@@ -35,3 +35,5 @@ npm run build
 3. 标尺辅助线
 
 
+### 截图
+![image](https://cdn.staticaly.com/gh/hbkgoing/blog_imgs@master/20210423/image.1y5psoy3ckjk.webp)
